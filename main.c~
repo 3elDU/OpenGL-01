@@ -1,0 +1,287 @@
+#include <windows.h>
+#include <gl/gl.h>
+
+LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
+void EnableOpenGL(HWND hwnd, HDC*, HGLRC*);
+void DisableOpenGL(HWND, HDC, HGLRC);
+
+
+typedef struct {
+    float r;
+    float g;
+    float b;
+} COLOR;
+
+
+void DrawRectangle(float x, float y, float z, float w, float h, COLOR clr) {
+    glBegin(GL_TRIANGLES);
+        glColor3f(clr.r, clr.g, clr.b);
+
+        glVertex3f(x, y, z);
+        glVertex3f(x+w, y, z);
+        glVertex3f(x, y+h, z);
+
+        glVertex3f(x, y+h, z);
+        glVertex3f(x+w, y+h, z);
+        glVertex3f(x+w, y, z);
+    glEnd();
+}
+
+void DrawPoint(float x, float y, COLOR clr, float pointSize) {
+    glPointSize(pointSize);
+
+    glBegin(GL_POINTS);
+        glColor3f(clr.r, clr.g, clr.b);
+        glVertex2f(x, y);
+    glEnd();
+}
+
+
+int WINAPI WinMain(HINSTANCE hInstance,
+                   HINSTANCE hPrevInstance,
+                   LPSTR lpCmdLine,
+                   int nCmdShow)
+{
+    WNDCLASSEX wcex;
+    HWND hwnd;
+    HDC hDC;
+    HGLRC hRC;
+    MSG msg;
+    BOOL bQuit = FALSE;
+    float theta = 0.0f;
+
+    /* register window class */
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.style = CS_OWNDC;
+    wcex.lpfnWndProc = WindowProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    wcex.lpszMenuName = NULL;
+    wcex.lpszClassName = "GLSample";
+    wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);;
+
+
+    if (!RegisterClassEx(&wcex))
+        return 0;
+
+    /* create main window */
+    hwnd = CreateWindowEx(0,
+                          "GLSample",
+                          "OpenGL Sample",
+                          WS_OVERLAPPEDWINDOW,
+                          CW_USEDEFAULT,
+                          CW_USEDEFAULT,
+                          512,
+                          512,
+                          NULL,
+                          NULL,
+                          hInstance,
+                          NULL);
+
+    ShowWindow(hwnd, nCmdShow);
+
+    /* enable OpenGL for the window */
+    EnableOpenGL(hwnd, &hDC, &hRC);
+
+    COLOR black;
+
+    COLOR white;
+    white.r = 1.0f;
+    white.g = 1.0f;
+    white.b = 1.0f;
+
+    float rotqube = 0.0f;
+
+    // glEnable(GL_DEPTH_TEST);
+
+    /* program main loop */
+    while (!bQuit)
+    {
+        /* check for messages */
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            /* handle or dispatch messages */
+            if (msg.message == WM_QUIT)
+            {
+                bQuit = TRUE;
+            }
+            else
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
+        else
+        {
+            /* OpenGL animation code goes here */
+
+            /*
+
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glLoadIdentity();
+
+            glRotatef(theta, 1.0f, 1.0f, 0.0f);
+
+            int step = 0;
+
+            for (int x = -5; x < 5; x++) {
+                for (int y = -5; y < 5; y++) {
+                    for (int z = -5; z < 5; z++) {
+                        if (step % 2 == 0) {
+                            DrawRectangle(x*0.1, y*0.1, z*0.1, 0.1f, 0.1f, white);
+                        } else {
+                            DrawRectangle(x*0.1, y*0.1, z*0.1, 0.1f, 0.1f, black);
+                        }
+                        // DrawPoint(x, y, pointColor, 10);
+                        step++;
+                    }
+
+                    step++;
+                }
+                step++;
+            }
+
+            glPopMatrix();
+
+            SwapBuffers(hDC);
+
+            theta += 0.3f;
+            if (theta > 360) {
+                theta = 0.0f;
+            }
+            Sleep (1);
+            */
+
+                        // Clear Screen And Depth Buffer
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                // Reset The Current Modelview Matrix
+
+            glLoadIdentity();
+
+            //NEW//////////////////NEW//////////////////NEW//////////////////NEW/////////////
+
+              glTranslatef(0.0f, 0.0f,0.0f);	// Translate Into The Screen 7.0 Units
+              glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
+              glRotatef(rotqube,1.0f,1.0f,1.0f);
+              glBegin(GL_QUADS);		// Draw The Cube Using quads
+                glColor3f(0.0f,1.0f,0.0f);	// Color Blue
+                glVertex3f( 0.5f, 0.5f,-0.5f);	// Top Right Of The Quad (Top)
+                glVertex3f(-1.0f, 1.0f,-0.5f);	// Top Left Of The Quad (Top)
+                glVertex3f(-1.0f, 1.0f, 0.5f);	// Bottom Left Of The Quad (Top)
+                glVertex3f( 1.0f, 0.5f, 0.5f);	// Bottom Right Of The Quad (Top)
+                glColor3f(1.0f,0.5f,0.0f);	// Color Orange
+                glVertex3f( 1.0f,-1.0f, 1.0f);	// Top Right Of The Quad (Bottom)
+                glVertex3f(-1.0f,-1.0f, 1.0f);	// Top Left Of The Quad (Bottom)
+                glVertex3f(-1.0f,-1.0f,-1.0f);	// Bottom Left Of The Quad (Bottom)
+                glVertex3f( 1.0f,-1.0f,-1.0f);	// Bottom Right Of The Quad (Bottom)
+                glColor3f(1.0f,0.0f,0.0f);	// Color Red
+                glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Front)
+                glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Front)
+                glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Front)
+                glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Front)
+                glColor3f(1.0f,1.0f,0.0f);	// Color Yellow
+                glVertex3f( 1.0f,-1.0f,-1.0f);	// Top Right Of The Quad (Back)
+                glVertex3f(-1.0f,-1.0f,-1.0f);	// Top Left Of The Quad (Back)
+                glVertex3f(-1.0f, 1.0f,-1.0f);	// Bottom Left Of The Quad (Back)
+                glVertex3f( 1.0f, 1.0f,-1.0f);	// Bottom Right Of The Quad (Back)
+                glColor3f(0.0f,0.0f,1.0f);	// Color Blue
+                glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Left)
+                glVertex3f(-1.0f, 1.0f,-1.0f);	// Top Left Of The Quad (Left)
+                glVertex3f(-1.0f,-1.0f,-1.0f);	// Bottom Left Of The Quad (Left)
+                glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Left)
+                glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+                glVertex3f( 1.0f, 1.0f,-1.0f);	// Top Right Of The Quad (Right)
+                glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Right)
+                glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
+                glVertex3f( 1.0f,-1.0f,-1.0f);	// Bottom Right Of The Quad (Right)
+              glEnd();			// End Drawing The Cube
+
+              glPopMatrix();
+
+              SwapBuffers(hDC);
+
+              rotqube +=0.9f;
+        }
+    }
+
+    /* shutdown OpenGL */
+    DisableOpenGL(hwnd, hDC, hRC);
+
+    /* destroy the window explicitly */
+    DestroyWindow(hwnd);
+
+    return msg.wParam;
+}
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+        case WM_CLOSE:
+            PostQuitMessage(0);
+        break;
+
+        case WM_DESTROY:
+            return 0;
+
+        case WM_KEYDOWN:
+        {
+            switch (wParam)
+            {
+                case VK_ESCAPE:
+                    PostQuitMessage(0);
+                break;
+            }
+        }
+        break;
+
+        default:
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+
+    return 0;
+}
+
+void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
+{
+    PIXELFORMATDESCRIPTOR pfd;
+
+    int iFormat;
+
+    /* get the device context (DC) */
+    *hDC = GetDC(hwnd);
+
+    /* set the pixel format for the DC */
+    ZeroMemory(&pfd, sizeof(pfd));
+
+    pfd.nSize = sizeof(pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW |
+                  PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.cDepthBits = 16;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+
+    iFormat = ChoosePixelFormat(*hDC, &pfd);
+
+    SetPixelFormat(*hDC, iFormat, &pfd);
+
+    /* create and enable the render context (RC) */
+    *hRC = wglCreateContext(*hDC);
+
+    wglMakeCurrent(*hDC, *hRC);
+}
+
+void DisableOpenGL (HWND hwnd, HDC hDC, HGLRC hRC)
+{
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(hRC);
+    ReleaseDC(hwnd, hDC);
+}
